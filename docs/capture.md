@@ -21,7 +21,21 @@ What the agent sees:
 
 Overturn failing never blocks the send. The run page links back to the ticket.
 
-Source: [`packages/zendesk-app`](https://github.com/overturn-ai/overturn/tree/main/packages/zendesk-app). Front, Salesforce Service Cloud and Gmail follow the same shape.
+Source: [`packages/zendesk-app`](https://github.com/overturn-ai/overturn/tree/main/packages/zendesk-app).
+
+## Front
+
+The Overturn plugin sits in the conversation sidebar. It follows the same capture shape as the Zendesk app (`source: "front"`, `externalId: "fr:<conversation id>"`).
+
+1. Create a project API key in Overturn (Settings → API keys).
+2. Build `overturn-front-plugin.zip` from [`packages/front-plugin`](https://github.com/overturn-ai/overturn/tree/main/packages/front-plugin) and host `dist/app`. The recommended host is `scripts/proxy.mjs`, which attaches the key server-side so it never sits in the plugin URL or the iframe.
+3. In Front, add a developer app Side panel and point it at that origin. Settings use the same names as Zendesk (`agent`, `reason_pack`, `decision_fields`, `require_reason`, …), plus `overturn_proxy_url` when the plugin is not served by the proxy itself.
+
+What the teammate sees is the same panel: **Draft inserted · N words**, the pack's reason chips, an optional note. Front's Plugin SDK has no pre-send hook, so `require_reason` holds the capture in the panel until a reason is picked and never vetoes Front's own Send. A failed capture logs in the panel and gets out of the way. The conversation is read only after a draft appears.
+
+The actor is the teammate looking at the panel. The address a message was sent from is recorded as provenance only: on a shared inbox that address is the inbox, not the person who clicked Send.
+
+Source: [`packages/front-plugin`](https://github.com/overturn-ai/overturn/tree/main/packages/front-plugin). Salesforce Service Cloud and Gmail follow the same shape.
 
 ## Any other tool: `POST /v1/capture`
 
